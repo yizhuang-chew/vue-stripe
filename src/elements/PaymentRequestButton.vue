@@ -1,10 +1,10 @@
 <template>
-  <div id="stripe-payment-request-button">
-  </div>
+  <div id="stripe-payment-request-button" />
 </template>
 
 <script>
 import { loadStripe } from '@stripe/stripe-js/dist/pure.esm.js';
+import { STRIPE_PARTNER_DETAILS } from '../constants';
 const ELEMENT_TYPE = 'paymentRequestButton';
 export default {
   props: {
@@ -14,6 +14,7 @@ export default {
     },
     apiVersion: {
       type: String,
+      default: null,
     },
     country: {
       type: String,
@@ -55,6 +56,7 @@ export default {
     };
 
     this.stripe = await loadStripe(this.pk, stripeOptions);
+    this.stripe.registerAppInfo(STRIPE_PARTNER_DETAILS);
     this.paymentRequest = this.stripe.paymentRequest({
       country: this.country,
       currency: this.currency,
@@ -69,19 +71,15 @@ export default {
     this.element = this.elements.create(ELEMENT_TYPE, {
       paymentRequest: this.paymentRequest,
     });
-    // TODO: make canMakePayment work
     const result = await this.paymentRequest.canMakePayment();
-    console.warn('canMakePayment', result);
+    this.$emit('can-make-payment', result);
     if (result) {
       this.element.mount('#stripe-payment-request-button');
-      // it`s working!
-      this.paymentRequest.on('paymentmethod', this.onPaymentmethod)
-      // not this
-      // this.element.on('paymentmethod', this.onPaymentmethod);
+      this.paymentRequest.on('paymentmethod', this.onPaymentmethod);
     }
   },
   methods: {
-    // TODO: Test this
+    // TODO: Test actual payment
     async onPaymentmethod (e) {
       // Confirm the PaymentIntent without handling potential next actions (yet).
       const { paymentIntent, error: confirmError } = await this.stripe.confirmCardPayment(
