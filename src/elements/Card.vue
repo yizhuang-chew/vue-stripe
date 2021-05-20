@@ -1,18 +1,25 @@
 <template>
   <div>
     <form id="stripe-element-form">
-      <div id="stripe-element-mount-point"></div>
+      <div id="stripe-element-mount-point" />
       <slot name="stripe-element-errors">
-        <div id="stripe-element-errors" role="alert"></div>
+        <div
+          id="stripe-element-errors"
+          role="alert"
+        />
       </slot>
-      <button ref="submitButtonRef" type="submit" class="hide"></button>
+      <button
+        ref="submitButtonRef"
+        type="submit"
+        class="hide"
+      />
     </form>
   </div>
 </template>
 
 <script>
 import { loadStripe } from '@stripe/stripe-js/dist/pure.esm.js';
-import { DEFAULT_ELEMENT_STYLE } from '../constants';
+import { DEFAULT_ELEMENT_STYLE, STRIPE_PARTNER_DETAILS } from '../constants';
 const ELEMENT_TYPE = 'card';
 export default {
   props: {
@@ -22,9 +29,11 @@ export default {
     },
     stripeAccount: {
       type: String,
+      default: undefined,
     },
     apiVersion: {
       type: String,
+      default: undefined,
     },
     locale: {
       type: String,
@@ -48,6 +57,7 @@ export default {
     },
     value: {
       type: String,
+      default: undefined,
     },
     hidePostalCode: Boolean,
     iconStyle: {
@@ -91,6 +101,7 @@ export default {
     };
 
     this.stripe = await loadStripe(this.pk, stripeOptions);
+    this.stripe.registerAppInfo(STRIPE_PARTNER_DETAILS);
     this.elements = this.stripe.elements(this.elementsOptions);
     this.element = this.elements.create(ELEMENT_TYPE, createOptions);
     this.element.mount('#stripe-element-mount-point');

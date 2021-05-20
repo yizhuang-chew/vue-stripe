@@ -1,4 +1,7 @@
-import { loadStripe } from '@stripe/stripe-js/dist/pure.esm.js';
+import { STRIPE_PARTNER_DETAILS } from '../constants';
+/**
+ * @deprecated - This can be achieved by using the Stripe plugin.
+ */
 export default {
   async install (Vue, options) {
     const {
@@ -8,7 +11,8 @@ export default {
       locale,
       elementsOptions,
     } = options;
-    const stripe = await loadStripe(pk, { stripeAccount, apiVersion, locale });
+    const stripe = window.Stripe(pk, { stripeAccount, apiVersion, locale });
+    stripe.registerAppInfo(STRIPE_PARTNER_DETAILS);
     const elements = stripe.elements(elementsOptions);
     Vue.prototype.$stripe = stripe;
     Vue.prototype.$stripeElements = elements;
